@@ -16,7 +16,6 @@
   --shadow: rgba(0,0,0,0.25);
 }
 
-/* ===== RESET & WALLPAPER ===== */
 * { box-sizing: border-box; margin:0; padding:0; }
 html, body { width:100%; height:100%; font-family:system-ui,sans-serif; overflow-x:hidden; }
 
@@ -54,24 +53,20 @@ body::before {
   100% { background-position: 0 0, center; }
 }
 
-/* ===== CONTAINER & GLOBAL ===== */
 .container { max-width:1200px; margin:0 auto; padding:40px 24px 96px; position:relative; z-index:1; }
 body, h1,h2,h3,p,a { color:var(--text); text-shadow:1px 1px 0 #0a1228,2px 2px 0 rgba(0,0,0,0.25),3px 3px 2px rgba(0,0,0,0.4); }
 a { text-decoration:none; color:inherit; }
 
-/* ===== HEADER ===== */
 .header { display:flex; justify-content:space-between; align-items:center; padding-bottom:24px; border-bottom:1px solid var(--border); }
 .logo { font-weight:700; letter-spacing:0.04em; }
 .nav a { margin-left:20px; font-size:14px; color:var(--muted); }
 .nav a:hover { color:var(--text); }
 
-/* ===== HERO ===== */
 .hero { text-align:center; padding:96px 0 72px; }
 .hero h1 { font-size:44px; line-height:1.15; margin-bottom:16px; }
 .hero p { max-width:640px; margin:0 auto; font-size:18px; color:var(--muted); }
 .accent { color:var(--accent); }
 
-/* ===== 3D FRAMED PANELS ===== */
 .product-frame, .card-panel, .auction-panel, .trust-item {
   background: linear-gradient(180deg, #0f2040 0%, var(--panel) 100%);
   border:2px solid var(--accent);
@@ -99,7 +94,6 @@ a { text-decoration:none; color:inherit; }
   transform: rotate(45deg) translateX(100%);
 }
 
-/* ===== GRID & PANEL LAYOUT ===== */
 .auction-grid { display:grid; grid-template-columns:2fr 1fr; gap:24px; }
 .card-image { height:260px; border-radius:12px; background:linear-gradient(135deg,#1f2937,#020617); display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:14px; margin-bottom:16px; }
 .meta { font-size:14px; color:var(--muted); line-height:1.6; }
@@ -108,13 +102,10 @@ a { text-decoration:none; color:inherit; }
 .cta { margin-top:24px; padding:14px; text-align:center; border-radius:8px; background: rgba(201,162,77,0.08); border:1px solid rgba(201,162,77,0.25); font-weight:600; color:var(--accent); cursor: pointer; transition: all 0.3s ease; }
 .cta:hover { background: rgba(201,162,77,0.15); transform: translateY(-2px); }
 
-/* ===== TRUST GRID ===== */
 .trust { margin-top:64px; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:24px; }
 
-/* ===== FOOTER ===== */
 footer { margin-top:96px; padding-top:32px; border-top:1px solid var(--border); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px; }
 
-/* ===== MODAL STYLES ===== */
 .modal {
   display: none;
   position: fixed;
@@ -318,41 +309,35 @@ body.modal-open {
   display: flex;
 }
 
-/* Debug panel */
-.debug-panel {
+.status-message {
   position: fixed;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0,0,0,0.9);
-  border: 1px solid var(--accent);
+  top: 20px;
+  right: 20px;
+  padding: 12px 20px;
   border-radius: 8px;
-  padding: 10px;
-  max-width: 400px;
-  max-height: 300px;
-  overflow-y: auto;
-  font-family: monospace;
-  font-size: 12px;
-  color: #0f0;
+  font-size: 14px;
   z-index: 10000;
   display: none;
+  animation: slideIn 0.3s ease;
 }
 
-.debug-panel.show {
+.status-message.show {
   display: block;
 }
 
-.debug-toggle {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
-  background: var(--accent);
-  color: #000;
-  border: none;
-  border-radius: 4px;
-  padding: 5px 10px;
-  cursor: pointer;
-  z-index: 10001;
-  font-size: 12px;
+.status-message.error {
+  background: rgba(255, 107, 107, 0.9);
+  color: white;
+}
+
+.status-message.success {
+  background: rgba(81, 207, 102, 0.9);
+  color: white;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 </style>
 </head>
@@ -385,7 +370,6 @@ body.modal-open {
     </p>
   </section>
 
-  <!-- PRODUCT FRAMING -->
   <section class="product-frame">
     <div class="frame-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
       <div class="frame-title" style="font-weight:600; color:var(--accent);">Live Auction Environment</div>
@@ -416,7 +400,6 @@ body.modal-open {
     </div>
   </section>
 
-  <!-- TRUST / LEGAL SIGNALS -->
   <section class="trust">
     <div class="trust-item">PCAux is the seller of record for all items.</div>
     <div class="trust-item">Participation grants no ownership until auction close.</div>
@@ -424,7 +407,6 @@ body.modal-open {
     <div class="trust-item">Governed by Canadian law.</div>
   </section>
 
-  <!-- FOOTER -->
   <footer>
     <div>© PCAux</div>
     <div>
@@ -463,243 +445,236 @@ body.modal-open {
   </div>
 </div>
 
-<!-- DEBUG PANEL -->
-<button class="debug-toggle" id="debug-toggle">Debug</button>
-<div class="debug-panel" id="debug-panel"></div>
+<!-- Status Message -->
+<div class="status-message" id="status-message"></div>
 
-<!-- SUPABASE AUTH SCRIPT -->
+<!-- SUPABASE AUTH SCRIPT - FIXED VERSION -->
 <script>
+// CRITICAL FIX: Wait for Supabase library to load from CDN
+if (typeof supabase === 'undefined') {
+  console.error('❌ Supabase library not loaded! Check internet connection.');
+  alert('Error: Supabase library failed to load. Please check your internet connection and refresh the page.');
+}
+
 // YOUR SUPABASE CREDENTIALS
 const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
 
-// Create Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// CRITICAL FIX: Use correct syntax for CDN version
+// The CDN exposes 'supabase' global, and we destructure createClient from it
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Debug logging
-const debugPanel = document.getElementById('debug-panel');
-const debugToggle = document.getElementById('debug-toggle');
-let debugLogs = [];
-
-function log(message, data) {
-    const timestamp = new Date().toLocaleTimeString();
-    const logEntry = `[${timestamp}] ${message}`;
-    debugLogs.push(logEntry);
-    if (data) {
-        debugLogs.push(JSON.stringify(data, null, 2));
-    }
-    if (debugPanel) {
-        debugPanel.innerHTML = debugLogs.join('<br>');
-        debugPanel.scrollTop = debugPanel.scrollHeight;
-    }
-    console.log(logEntry, data);
-}
-
-debugToggle.addEventListener('click', () => {
-    debugPanel.classList.toggle('show');
-});
+console.log('✅ Supabase client created:', supabaseClient ? 'SUCCESS' : 'FAILED');
 
 document.addEventListener('DOMContentLoaded', async function() {
-    log("✅ DOM Loaded - Initializing Supabase Auth");
-    
-    // UI Elements
-    const loginBtn = document.getElementById('login-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const userInfo = document.getElementById('user-info');
-    const userEmail = document.getElementById('user-email');
-    const modal = document.getElementById('login-modal');
-    const closeModalBtn = document.getElementById('close-modal');
-    const cancelBtn = document.getElementById('cancel-btn');
-    const loginSubmit = document.getElementById('login-submit');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const errorMessage = document.getElementById('error-message');
-    const successMessage = document.getElementById('success-message');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    
-    // Check existing session
-    log("Checking existing session...");
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    log("Session check result:", { session: session ? 'exists' : 'none', error: sessionError });
+  console.log('✅ DOM Loaded');
+  
+  // UI Elements
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const userInfo = document.getElementById('user-info');
+  const userEmail = document.getElementById('user-email');
+  const modal = document.getElementById('login-modal');
+  const closeModalBtn = document.getElementById('close-modal');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const loginSubmit = document.getElementById('login-submit');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const errorMessage = document.getElementById('error-message');
+  const successMessage = document.getElementById('success-message');
+  const loadingSpinner = document.getElementById('loading-spinner');
+  const statusMessage = document.getElementById('status-message');
+  
+  // Show status message
+  function showStatus(msg, type) {
+    statusMessage.textContent = msg;
+    statusMessage.className = 'status-message show ' + type;
+    setTimeout(() => {
+      statusMessage.classList.remove('show');
+    }, 5000);
+  }
+  
+  // Check if elements exist
+  if (!loginBtn || !modal || !loginSubmit) {
+    console.error('❌ Critical elements missing!');
+    showStatus('Page error: Elements not found', 'error');
+    return;
+  }
+  
+  console.log('✅ All UI elements found');
+  
+  // Check existing session
+  try {
+    const { data: { session }, error } = await supabaseClient.auth.getSession();
+    console.log('Session check:', session ? 'Found' : 'None', error ? 'Error: ' + error.message : '');
     
     if (session) {
-        log("Found existing session for:", session.user.email);
-        showLoggedIn(session.user);
+      showLoggedIn(session.user);
+    }
+  } catch (e) {
+    console.error('Session check error:', e);
+  }
+  
+  // Auth state listener
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    console.log('Auth state:', event, session?.user?.email);
+    if (event === 'SIGNED_IN' && session) {
+      showLoggedIn(session.user);
+      closeModal();
+    } else if (event === 'SIGNED_OUT') {
+      showLoggedOut();
+    }
+  });
+  
+  function showLoggedIn(user) {
+    loginBtn.style.display = 'none';
+    userInfo.classList.add('show');
+    userEmail.textContent = user.email;
+    console.log('✅ Logged in as:', user.email);
+  }
+  
+  function showLoggedOut() {
+    loginBtn.style.display = 'block';
+    userInfo.classList.remove('show');
+    userEmail.textContent = '';
+  }
+  
+  function openModal(e) {
+    if (e) e.preventDefault();
+    console.log('🔓 Opening modal');
+    emailInput.value = '';
+    passwordInput.value = '';
+    hideMessages();
+    modal.classList.add('show');
+    document.body.classList.add('modal-open');
+    setTimeout(() => emailInput.focus(), 100);
+  }
+  
+  function closeModal() {
+    console.log('🔒 Closing modal');
+    modal.classList.remove('show');
+    document.body.classList.remove('modal-open');
+  }
+  
+  function hideMessages() {
+    errorMessage.classList.remove('show');
+    successMessage.classList.remove('show');
+    loadingSpinner.classList.remove('show');
+  }
+  
+  function showError(msg) {
+    errorMessage.textContent = msg;
+    errorMessage.classList.add('show');
+    successMessage.classList.remove('show');
+    loadingSpinner.classList.remove('show');
+    loginSubmit.disabled = false;
+    loginSubmit.textContent = 'Sign In';
+    console.log('❌ Error:', msg);
+  }
+  
+  function showSuccess() {
+    successMessage.classList.add('show');
+    errorMessage.classList.remove('show');
+    loadingSpinner.classList.remove('show');
+  }
+  
+  function setLoading(loading) {
+    loginSubmit.disabled = loading;
+    loginSubmit.textContent = loading ? 'Signing In...' : 'Sign In';
+    if (loading) loadingSpinner.classList.add('show');
+    else loadingSpinner.classList.remove('show');
+  }
+  
+  async function handleLogin() {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    
+    console.log('🔐 Login attempt for:', email);
+    
+    hideMessages();
+    
+    if (!email || !password) {
+      showError('Please enter both email and password.');
+      return;
     }
     
-    // Auth state listener
-    supabase.auth.onAuthStateChange((event, session) => {
-        log("Auth state changed:", { event, user: session?.user?.email });
-        if (event === 'SIGNED_IN' && session) {
-            showLoggedIn(session.user);
-            closeModal();
-        } else if (event === 'SIGNED_OUT') {
-            showLoggedOut();
-        }
-    });
+    setLoading(true);
     
-    function showLoggedIn(user) {
-        loginBtn.style.display = 'none';
-        userInfo.classList.add('show');
-        userEmail.textContent = user.email;
-        log("✅ UI updated - logged in as:", user.email);
-    }
-    
-    function showLoggedOut() {
-        loginBtn.style.display = 'block';
-        userInfo.classList.remove('show');
-        userEmail.textContent = '';
-    }
-    
-    function openModal(e) {
-        if (e) e.preventDefault();
-        emailInput.value = '';
-        passwordInput.value = '';
-        hideMessages();
-        modal.classList.add('show');
-        document.body.classList.add('modal-open');
-        setTimeout(() => emailInput.focus(), 100);
-    }
-    
-    function closeModal() {
-        modal.classList.remove('show');
-        document.body.classList.remove('modal-open');
-    }
-    
-    function hideMessages() {
-        errorMessage.classList.remove('show');
-        successMessage.classList.remove('show');
-        loadingSpinner.classList.remove('show');
-    }
-    
-    function showError(msg) {
-        errorMessage.textContent = msg;
-        errorMessage.classList.add('show');
-        successMessage.classList.remove('show');
-        loadingSpinner.classList.remove('show');
-        loginSubmit.disabled = false;
-        loginSubmit.textContent = 'Sign In';
-        log("❌ Error shown:", msg);
-    }
-    
-    function showSuccess() {
-        successMessage.classList.add('show');
-        errorMessage.classList.remove('show');
-        loadingSpinner.classList.remove('show');
-    }
-    
-    function setLoading(loading) {
-        loginSubmit.disabled = loading;
-        loginSubmit.textContent = loading ? 'Signing In...' : 'Sign In';
-        if (loading) loadingSpinner.classList.add('show');
-        else loadingSpinner.classList.remove('show');
-    }
-    
-    async function handleLogin() {
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
-        
-        log("🔐 Login attempt:", { email: email, passwordLength: password.length });
-        
-        hideMessages();
-        
-        if (!email || !password) {
-            showError("Please enter both email and password.");
-            return;
-        }
-        
-        setLoading(true);
-        
-        try {
-            log("Calling supabase.auth.signInWithPassword...");
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
-            
-            log("Sign in response:", { 
-                success: !!data?.user, 
-                error: error?.message,
-                errorCode: error?.code,
-                user: data?.user?.email 
-            });
-            
-            if (error) {
-                log("❌ Login error details:", { 
-                    message: error.message, 
-                    code: error.code,
-                    status: error.status
-                });
-                showError(error.message === 'Invalid login credentials' 
-                    ? 'Invalid email or password. Please try again.' 
-                    : error.message);
-            } else if (data?.user) {
-                log("✅ Login successful:", data.user.email);
-                showSuccess();
-                setTimeout(() => {
-                    closeModal();
-                    showLoggedIn(data.user);
-                }, 800);
-            } else {
-                log("⚠️ No error but no user data:", data);
-                showError("Unexpected error. Please try again.");
-            }
-        } catch (err) {
-            log("❌ Exception caught:", { 
-                message: err.message, 
-                stack: err.stack 
-            });
-            showError("An unexpected error occurred. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    }
-    
-    async function handleLogout(e) {
-        e.preventDefault();
-        log("Logging out...");
-        const { error } = await supabase.auth.signOut();
-        if (!error) {
-            showLoggedOut();
-            log("✅ Logged out");
-        } else {
-            log("❌ Logout error:", error);
-        }
-    }
-    
-    // Event Listeners
-    loginBtn.addEventListener('click', openModal);
-    logoutBtn.addEventListener('click', handleLogout);
-    closeModalBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
-    loginSubmit.addEventListener('click', handleLogin);
-    
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) closeModal();
-    });
-    
-    [emailInput, passwordInput].forEach(input => {
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') handleLogin();
-        });
-    });
-    
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal.classList.contains('show')) {
-            closeModal();
-        }
-    });
-    
-    log("✅ Supabase Auth initialized");
-    
-    // Test connection
-    log("Testing Supabase connection...");
     try {
-        const { data: { user } } = await supabase.auth.getUser();
-        log("Connection test - current user:", user ? user.email : 'none');
-    } catch (e) {
-        log("Connection test failed:", e.message);
+      console.log('Calling signInWithPassword...');
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      
+      console.log('Response:', { success: !!data?.user, error: error?.message });
+      
+      if (error) {
+        showError(error.message === 'Invalid login credentials' 
+          ? 'Invalid email or password. Please try again.' 
+          : error.message);
+      } else if (data?.user) {
+        showSuccess();
+        setTimeout(() => {
+          closeModal();
+          showLoggedIn(data.user);
+          showStatus('Welcome back, ' + data.user.email + '!', 'success');
+        }, 800);
+      } else {
+        showError('Unexpected error. Please try again.');
+      }
+    } catch (err) {
+      console.error('Exception:', err);
+      showError('Connection error. Please check your internet and try again.');
+    } finally {
+      setLoading(false);
     }
+  }
+  
+  async function handleLogout(e) {
+    e.preventDefault();
+    const { error } = await supabaseClient.auth.signOut();
+    if (!error) {
+      showLoggedOut();
+      showStatus('You have been logged out.', 'success');
+    }
+  }
+  
+  // Event Listeners - CRITICAL: These must be added after DOM is loaded
+  console.log('Adding event listeners...');
+  
+  loginBtn.addEventListener('click', function(e) {
+    console.log('Login button clicked');
+    openModal(e);
+  });
+  
+  logoutBtn.addEventListener('click', handleLogout);
+  closeModalBtn.addEventListener('click', closeModal);
+  cancelBtn.addEventListener('click', closeModal);
+  
+  loginSubmit.addEventListener('click', function() {
+    console.log('Submit button clicked');
+    handleLogin();
+  });
+  
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) closeModal();
+  });
+  
+  [emailInput, passwordInput].forEach(input => {
+    input.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') handleLogin();
+    });
+  });
+  
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.classList.contains('show')) {
+      closeModal();
+    }
+  });
+  
+  console.log('✅ All event listeners added successfully');
 });
 </script>
 
