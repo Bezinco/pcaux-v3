@@ -190,22 +190,75 @@ footer { margin-top:96px; padding-top:32px; border-top:1px solid var(--border); 
 
 </div> <!-- close container -->
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-    alert("🔴 Script loaded - waiting for DOM...");
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = 'https://knceschbzidmqvosdwud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtuY2VzY2hiemlkbXF2b3Nkd3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NTY2MTgsImV4cCI6MjA4NjUzMjYxOH0.2lZXDSMAQwo4mD5y66-2d6kd6FXMvIFBmNbBgoSx56o';
+
+// Create Supabase client
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ===== AUTH LOGIC =====
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ PCAux ready');
     
-    document.addEventListener('DOMContentLoaded', function() {
-        alert("🔴 DOM ready!");
-        
-        const loginBtn = document.getElementById('login-btn');
-        alert("🔴 Button found? " + (loginBtn ? "YES" : "NO"));
-        
-        if (loginBtn) {
-            loginBtn.onclick = function(e) {
-                e.preventDefault();
-                alert("🔴 Button clicked!");
-            };
+    const loginBtn = document.getElementById('login-btn');
+    
+    if (loginBtn) {
+        loginBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            const email = prompt('Enter your email to sign in:');
+            if (!email) return;
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithOtp({
+                    email: email,
+                    options: {
+                        shouldCreateUser: true,
+                        emailRedirectTo: window.location.origin + '/dashboard.html'
+                    }
+                });
+                
+                if (error) throw error;
+                
+                alert('✨ Magic link sent! Check your email.');
+                
+                // Show user section
+                const userSection = document.getElementById('user-section');
+                if (userSection) {
+                    document.getElementById('user-email').textContent = email;
+                    userSection.style.display = 'block';
+                    loginBtn.style.display = 'none';
+                }
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+                console.error(error);
+            }
+        });
+    }
+    
+    // Check for existing session
+    checkUser();
+});
+
+async function checkUser() {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+        const userSection = document.getElementById('user-section');
+        if (userSection) {
+            document.getElementById('user-email').textContent = user.email;
+            userSection.style.display = 'block';
+            
+            const loginBtn = document.getElementById('login-btn');
+            if (loginBtn) loginBtn.style.display = 'none';
         }
-    });
+    }
+}
 </script>
 
 </body>
