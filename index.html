@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>PCAux — Competitive Auctions</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Supabase JS Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --text: #e5e7eb;
@@ -112,7 +114,7 @@ a { text-decoration:none; color:inherit; }
 /* ===== FOOTER ===== */
 footer { margin-top:96px; padding-top:32px; border-top:1px solid var(--border); font-size:13px; color:var(--muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px; }
 
-/* ===== MODAL STYLES - FIXED ===== */
+/* ===== MODAL STYLES ===== */
 .modal {
   display: none;
   position: fixed;
@@ -145,14 +147,8 @@ footer { margin-top:96px; padding-top:32px; border-top:1px solid var(--border); 
 }
 
 @keyframes modalSlideIn {
-  from {
-    transform: translateY(-50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 .modal h2 {
@@ -214,10 +210,15 @@ footer { margin-top:96px; padding-top:32px; border-top:1px solid var(--border); 
   color: #000;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: #dbb45c;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(201, 162, 77, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-secondary {
@@ -283,9 +284,38 @@ footer { margin-top:96px; padding-top:32px; border-top:1px solid var(--border); 
   display: block;
 }
 
-/* Prevent body scroll when modal is open */
+.loading-spinner {
+  display: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(201, 162, 77, 0.3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+.loading-spinner.show {
+  display: block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 body.modal-open {
   overflow: hidden;
+}
+
+.user-info {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent);
+}
+
+.user-info.show {
+  display: flex;
 }
 </style>
 </head>
@@ -300,6 +330,10 @@ body.modal-open {
       <a href="#">Auctions</a>
       <a href="#">Rules</a>
       <a href="#" id="login-btn">Sign In</a>
+      <div class="user-info" id="user-info">
+        <span id="user-email"></span>
+        <a href="#" id="logout-btn" style="color: var(--muted); font-size: 12px;">(Logout)</a>
+      </div>
     </nav>
   </header>
 
@@ -363,9 +397,9 @@ body.modal-open {
     </div>
   </footer>
 
-</div> <!-- close container -->
+</div>
 
-<!-- LOGIN MODAL - MOVED OUTSIDE CONTAINER -->
+<!-- LOGIN MODAL -->
 <div class="modal" id="login-modal">
   <div class="modal-content">
     <span class="close-modal" id="close-modal">&times;</span>
@@ -373,21 +407,17 @@ body.modal-open {
     
     <div class="form-group">
       <label for="email">Email</label>
-      <input type="email" id="email" placeholder="Enter your email" autocomplete="email">
+      <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
     </div>
     
     <div class="form-group">
       <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
     </div>
     
-    <div class="error-message" id="error-message">
-      Invalid email or password. Please try again.
-    </div>
-    
-    <div class="success-message" id="success-message">
-      Login successful! Redirecting...
-    </div>
+    <div class="error-message" id="error-message"></div>
+    <div class="success-message" id="success-message">Login successful!</div>
+    <div class="loading-spinner" id="loading-spinner"></div>
     
     <div class="modal-buttons">
       <button class="btn-secondary" id="cancel-btn">Cancel</button>
@@ -396,13 +426,23 @@ body.modal-open {
   </div>
 </div>
 
-<!-- JAVASCRIPT - CLEANED UP -->
+<!-- SUPABASE AUTH SCRIPT -->
 <script>
-(function() {
-    'use strict';
+// Initialize Supabase - REPLACE THESE WITH YOUR ACTUAL VALUES
+const SUPABASE_URL = 'https://your-project.supabase.co';
+const SUPABASE_ANON_KEY = 'your-anon-key';
+
+// Create Supabase client
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log("✅ DOM Loaded - Initializing Supabase Auth");
     
-    // Get elements once
+    // UI Elements
     const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userInfo = document.getElementById('user-info');
+    const userEmail = document.getElementById('user-email');
     const modal = document.getElementById('login-modal');
     const closeModalBtn = document.getElementById('close-modal');
     const cancelBtn = document.getElementById('cancel-btn');
@@ -411,55 +451,81 @@ body.modal-open {
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('error-message');
     const successMessage = document.getElementById('success-message');
+    const loadingSpinner = document.getElementById('loading-spinner');
     
-    // Test credentials
-    const VALID_EMAIL = "test@example.com";
-    const VALID_PASSWORD = "password123";
+    // Check existing session
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (session) {
+        showLoggedIn(session.user);
+    }
     
-    // Open modal
+    // Auth state listener
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+            showLoggedIn(session.user);
+            closeModal();
+        } else if (event === 'SIGNED_OUT') {
+            showLoggedOut();
+        }
+    });
+    
+    function showLoggedIn(user) {
+        loginBtn.style.display = 'none';
+        userInfo.classList.add('show');
+        userEmail.textContent = user.email;
+        console.log("✅ Logged in as:", user.email);
+    }
+    
+    function showLoggedOut() {
+        loginBtn.style.display = 'block';
+        userInfo.classList.remove('show');
+        userEmail.textContent = '';
+    }
+    
     function openModal(e) {
         if (e) e.preventDefault();
-        
-        // Reset form
         emailInput.value = '';
         passwordInput.value = '';
         hideMessages();
-        
-        // Show modal
         modal.classList.add('show');
         document.body.classList.add('modal-open');
-        
-        // Focus email field
         setTimeout(() => emailInput.focus(), 100);
     }
     
-    // Close modal
     function closeModal() {
         modal.classList.remove('show');
         document.body.classList.remove('modal-open');
     }
     
-    // Hide messages
     function hideMessages() {
         errorMessage.classList.remove('show');
         successMessage.classList.remove('show');
+        loadingSpinner.classList.remove('show');
     }
     
-    // Show error
     function showError(msg) {
         errorMessage.textContent = msg;
         errorMessage.classList.add('show');
         successMessage.classList.remove('show');
+        loadingSpinner.classList.remove('show');
+        loginSubmit.disabled = false;
+        loginSubmit.textContent = 'Sign In';
     }
     
-    // Show success
     function showSuccess() {
         successMessage.classList.add('show');
         errorMessage.classList.remove('show');
+        loadingSpinner.classList.remove('show');
     }
     
-    // Handle login
-    function handleLogin() {
+    function setLoading(loading) {
+        loginSubmit.disabled = loading;
+        loginSubmit.textContent = loading ? 'Signing In...' : 'Sign In';
+        if (loading) loadingSpinner.classList.add('show');
+        else loadingSpinner.classList.remove('show');
+    }
+    
+    async function handleLogin() {
         const email = emailInput.value.trim();
         const password = passwordInput.value;
         
@@ -470,64 +536,69 @@ body.modal-open {
             return;
         }
         
-        if (email === VALID_EMAIL && password === VALID_PASSWORD) {
-            showSuccess();
-            
-            setTimeout(function() {
-                closeModal();
-                alert("Welcome to PCAux, " + email + "!\n\nIn a real app, you would now be logged in.");
-                
-                if (loginBtn) {
-                    loginBtn.textContent = "My Account";
-                }
-            }, 1500);
-        } else {
-            showError("Invalid credentials. Try: test@example.com / password123");
-        }
-    }
-    
-    // Event listeners
-    if (loginBtn) {
-        loginBtn.addEventListener('click', openModal);
-    }
-    
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', closeModal);
-    }
-    
-    if (cancelBtn) {
-        cancelBtn.addEventListener('click', closeModal);
-    }
-    
-    if (loginSubmit) {
-        loginSubmit.addEventListener('click', handleLogin);
-    }
-    
-    // Close on backdrop click
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
-    
-    // Enter key support
-    [emailInput, passwordInput].forEach(input => {
-        if (input) {
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleLogin();
-                }
+        setLoading(true);
+        console.log("🔐 Attempting login for:", email);
+        
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
             });
+            
+            if (error) {
+                console.error("❌ Login error:", error);
+                showError(error.message === 'Invalid login credentials' 
+                    ? 'Invalid email or password. Please try again.' 
+                    : error.message);
+            } else {
+                console.log("✅ Login successful:", data.user);
+                showSuccess();
+                setTimeout(() => {
+                    closeModal();
+                    showLoggedIn(data.user);
+                }, 800);
+            }
+        } catch (err) {
+            console.error("❌ Unexpected error:", err);
+            showError("An unexpected error occurred. Please try again.");
+        } finally {
+            setLoading(false);
         }
+    }
+    
+    async function handleLogout(e) {
+        e.preventDefault();
+        const { error } = await supabase.auth.signOut();
+        if (!error) {
+            showLoggedOut();
+        }
+    }
+    
+    // Event Listeners
+    loginBtn.addEventListener('click', openModal);
+    logoutBtn.addEventListener('click', handleLogout);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    loginSubmit.addEventListener('click', handleLogin);
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
     });
     
-    // Escape key to close
+    [emailInput, passwordInput].forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+    });
+    
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.classList.contains('show')) {
             closeModal();
         }
     });
-})();
+    
+    console.log("✅ Supabase Auth initialized");
+});
 </script>
 
 </body>
