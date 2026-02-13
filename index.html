@@ -191,19 +191,21 @@ footer { margin-top:96px; padding-top:32px; border-top:1px solid var(--border); 
 </div> <!-- close container -->
 
 <script>
-    alert("🔴 LINE 1: Script started");
+    alert("🔴 Script loaded - waiting for DOM...");
     
-    const loginBtn = document.getElementById('login-btn');
-    alert("🔴 LINE 2: Got button? " + (loginBtn ? "YES" : "NO"));
-    
-    if (loginBtn) {
-        loginBtn.onclick = function(e) {
-            e.preventDefault();
-            alert("🔴 LINE 3: Button clicked!");
-        };
-    }
-    
-    alert("🔴 LINE 4: Script finished");
+    document.addEventListener('DOMContentLoaded', function() {
+        alert("🔴 DOM ready!");
+        
+        const loginBtn = document.getElementById('login-btn');
+        alert("🔴 Button found? " + (loginBtn ? "YES" : "NO"));
+        
+        if (loginBtn) {
+            loginBtn.onclick = function(e) {
+                e.preventDefault();
+                alert("🔴 Button clicked!");
+            };
+        }
+    });
 </script>
 
 </body>
