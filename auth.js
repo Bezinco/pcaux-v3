@@ -1,50 +1,36 @@
-// PCAUX - FULL SUPABASE AUTHENTICATION
-console.log('🔥 PCAux Auth Loaded');
+// PCAUX Authentication
+console.log('🔥 Auth.js loaded');
 
 // Use the global supabase client
-const supabase = window.supabaseClient;
+const supabase = window.supabase;
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM ready');
-    console.log('Supabase client exists:', supabase ? 'YES' : 'NO');
+    console.log('Supabase exists:', !!supabase);
     
     const loginBtn = document.getElementById('login-btn');
-    console.log('Login button found:', loginBtn ? 'YES' : 'NO');
+    console.log('Login button:', loginBtn ? 'FOUND' : 'NOT FOUND');
     
     if (loginBtn) {
-        loginBtn.addEventListener('click', handleLogin);
-    }
-    
-    await checkUser();
-});
-
-async function handleLogin(e) {
-    e.preventDefault();
-    console.log('🟢 Login clicked');
-    
-    const email = prompt('Enter your email to sign in:');
-    if (!email) return;
-    
-    try {
-        console.log('Attempting login for:', email);
-        
-        const { data, error } = await supabase.auth.signInWithOtp({
-            email: email,
-            options: {
-                shouldCreateUser: true,
-                emailRedirectTo: window.location.origin + '/dashboard.html'
+        loginBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            console.log('🟢 Login clicked');
+            
+            const email = prompt('Enter your email:');
+            if (!email) return;
+            
+            try {
+                const { error } = await supabase.auth.signInWithOtp({
+                    email: email,
+                    options: { shouldCreateUser: true }
+                });
+                
+                if (error) throw error;
+                alert('✅ Magic link sent! Check your email.');
+            } catch (err) {
+                alert('Error: ' + err.message);
+                console.error(err);
             }
         });
-        
-        if (error) throw error;
-        
-        alert('✨ Magic link sent! Check your email.');
-        console.log('✅ Magic link sent');
-        
-    } catch (error) {
-        alert('Error: ' + error.message);
-        console.error('Login error:', error);
     }
-}
-
-// ... rest of your auth.js code (keep everything else the same)
+});
